@@ -1,0 +1,50 @@
+# Environment
+.env
+.env.local
+.env.*.local
+.env.example
+
+# Dependencies
+node_modules
+yarn.lock
+
+# Build outputs
+dist
+build
+generated
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+downloads/
+sessions-bot/
+.tdlib/
+tests/.tdlib/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+
+# Prisma
+/prisma/migrations/*/*.sql
+!/prisma/migrations/migration_lock.toml
+
+# Temp files
+a.js

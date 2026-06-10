@@ -1,0 +1,49 @@
+{
+  "scripts": {
+    "dev": "tsx --watch ./src/infra/server",
+    "test:unit": " vitest --project unit",
+    "test:e2e": " vitest --project e2e",
+    "fix": "biome lint --write --unsafe"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.9",
+    "@types/archiver": "^7.0.0",
+    "@types/boom": "^7.3.5",
+    "@types/node": "^25.5.0",
+    "@types/pg": "^8.20.0",
+    "@types/qrcode-terminal": "^0.12.2",
+    "@types/unzipper": "^0.10.11",
+    "prisma": "^7.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  },
+  "dependencies": {
+    "@itsukichan/baileys": "^7.3.2",
+    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "archiver": "^7.0.1",
+    "axios": "^1.14.0",
+    "boom": "^7.3.0",
+    "decompress": "^4.2.1",
+    "decompress-tarbz2": "^4.1.1",
+    "decompress-targz": "^4.1.1",
+    "decompress-tarxz": "^3.0.0",
+    "decompress-unzip": "^4.0.1",
+    "dotenv": "^17.3.1",
+    "extract-zip": "^2.0.1",
+    "node-rar": "^0.0.2",
+    "node-unrar-js": "^2.0.2",
+    "pg": "^8.20.0",
+    "pino": "^10.3.1",
+    "prebuilt-tdlib": "^0.1008063.0",
+    "qrcode-terminal": "^0.12.0",
+    "rar-stream": "^5.5.0",
+    "tdl": "^8.1.0",
+    "telegraf": "^4.16.3",
+    "telegram": "^2.26.22",
+    "unrar.js": "^0.2.5",
+    "unzipper": "^0.12.3",
+    "zod": "^4.3.6"
+  }
+}

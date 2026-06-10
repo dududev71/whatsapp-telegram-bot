@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Downloads {
+  id            String    @id @default(uuid())
+  localFile     String    @unique
+  cratedAt      DateTime  @default(now())
+  checked       DateTime?
+  isCompact     Boolean   @default(false)
+  ownerPhone    String?
+  OwnerUserName String
+  fileName      String    @unique
+  cookieReports CookieReport[]
+}
+
+model CheckerProfile {
+  id          String   @id @default(uuid())
+  jid         String   @unique
+  checkers    String[]
+  updatedAt   DateTime @updatedAt
+
+  @@map("checker_profiles")
+}
+
+model CookieReport {
+  id          String   @id @default(uuid())
+  download    Downloads @relation(fields: [downloadId], references: [id])
+  downloadId  String
+  checkerName String
+  cookie      String
+  report      String
+  createdAt   DateTime @default(now())
+
+  @@index([downloadId])
+  @@index([checkerName])
+}

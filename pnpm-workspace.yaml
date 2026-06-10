@@ -1,0 +1,14 @@
+ignoredBuiltDependencies:
+  - '@itsukichan/baileys'
+  - '@prisma/engines'
+  - bufferutil
+  - es5-ext
+  - esbuild
+  - prisma
+  - protobufjs
+  - rar-stream
+  - tdl
+  - utf-8-validate
+# pnpm-workspace.yaml
+onlyBuiltDependencies:
+  - "baileys"

@@ -1,0 +1,16 @@
+services:
+  postgresql:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql_data:/bitnami/postgresql
+    environment:
+      - POSTGRESQL_USERNAME=bot-logs
+      - POSTGRESQL_PASSWORD=duduzzk71
+      - POSTGRESQL_DATABASE=bot-logs
+      - ALLOW_EMPTY_PASSWORD=no
+
+volumes:
+  postgresql_data:
+    driver: local

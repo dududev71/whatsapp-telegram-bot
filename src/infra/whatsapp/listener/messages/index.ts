@@ -29,26 +29,13 @@ import { HandleCommands } from './handles/handle-main-commands'
 import type { ExecuteAnswerProps } from './repository/answers'
 import type { ButtonsInterface, ExecuteProps } from './repository/command'
 import { AnswerWatings } from './utils/answer-wating'
+import type { depencies } from './repository/deps'
 
 interface Settings {
   prefix: string
   readHistory: boolean
 }
 
-export interface depencies {
-  TelegramChatRepository: TelegramChatRepository
-  TelegramDownloadRepository: TelegramDownloadRepository
-  DownloadProgresStore: DownloadProgresStore
-  CheckerSessionStore: CheckerSessionStore
-  CheckerProfileRepository: CheckerProfileRepository
-  PrismaRepositoryDownloads: PrismaRepositoryDownloads
-  dispatcher: EventDispatcher
-  archiveRepository: ArchivesRepository
-  ReadArchives: ReadArchives
-  handleChecker: HandleSourcesPort
-  NotifyRepository: NotifyRepositoryPort
-  NetflixRepository: NetflixCookies
-}
 export class Listener {
   private settings: Settings
 

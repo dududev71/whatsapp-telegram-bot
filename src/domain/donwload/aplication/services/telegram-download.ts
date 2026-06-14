@@ -82,9 +82,13 @@ export class TelegramDownloadService {
     })
 
     if (isCompact && this.archiveRepository.isValidPath(logPath)) {
-      console.log(`[DOWNLOAD] Extracting: logPath=${logPath}, fileName=${fileName}`)
+      await this.dispatcher.dispatch(
+        new NewNotifyEvent({
+          content: `Download finished: ${fileName}. Extracting...`,
+          jidRecipient: jid,
+        }),
+      )
       const archive = new Archive({ localFile: logPath, fileName })
-      console.log(`[DOWNLOAD] Archive created: localFile=${archive.localFile}`)
       const extractResult = await this.archiveRepository.descompact(archive)
 
       if (extractResult.isRight()) {

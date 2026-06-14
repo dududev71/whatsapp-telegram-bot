@@ -1,5 +1,4 @@
 import archiver from 'archiver'
-import extract from 'extract-zip'
 import {
   closeSync,
   existsSync,
@@ -19,6 +18,17 @@ import type { ReportForCompact } from '../../../domain/shared/arquives/interface
 import { createExtractorFromData } from 'node-unrar-js'
 import { spawn } from 'node:child_process'
 import os from 'node:os'
+
+const EXTRACTION_TIMEOUT_MS = 120_000 // 2 minutes
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout: ${label} exceeded ${ms}ms`)), ms),
+    ),
+  ])
+}
 
 function get7zBinPaths(): string[] {
   const platform = os.platform()
@@ -153,25 +163,38 @@ export class ArchivesRepositoryAdapter implements ArchivesRepository {
       mkdirSync(outputDir, { recursive: true })
 
       if (fileType === 'zip') {
-        try {
-          if (password) {
-            // ZIP com senha: unzipper suporta password
-            const zip = await unzipper.Open.file(localFile)
-            for (const file of zip.files) {
-              if (file.type === 'Directory') continue
-              const content = await file.buffer(password)
-              if (!content || Buffer.isBuffer(content) === false) continue
-              const outputPath = path.join(outputDir, file.path)
-              mkdirSync(path.dirname(outputPath), { recursive: true })
-              writeFileSync(outputPath, content)
-            }
-          } else {
-            // ZIP sem senha: extract-zip (mais rápido e confiável)
-            await extract(localFile, { dir: outputDir })
+        if (os.platform() === 'win32') {
+          await new Promise<void>((resolve, reject) => {
+            const ps = spawn('powershell', [
+              '-NoProfile', '-Command',
+              `Expand-Archive -Path '${localFile}' -DestinationPath '${outputDir}' -Force`,
+            ], { stdio: ['pipe', 'pipe', 'pipe'] })
+            let stderr = ''
+            ps.stderr.on('data', (d) => (stderr += d.toString()))
+            ps.on('error', reject)
+            ps.on('close', (code) => {
+              if (code === 0) resolve()
+              else reject(new Error(`PowerShell Exit ${code}: ${stderr}`))
+            })
+          })
+        } else {
+          const unzip = await withTimeout(
+            unzipper.Open.file(localFile),
+            EXTRACTION_TIMEOUT_MS,
+            'unzipper.Open.file',
+          )
+          const files = unzip.files.filter((f) => f.type !== 'Directory')
+          for (const file of files) {
+            const content = await withTimeout(
+              password ? file.buffer(password) : file.buffer(),
+              EXTRACTION_TIMEOUT_MS,
+              `file.buffer(${file.path})`,
+            )
+            if (!content || Buffer.isBuffer(content) === false) continue
+            const outputPath = path.join(outputDir, file.path)
+            mkdirSync(path.dirname(outputPath), { recursive: true })
+            writeFileSync(outputPath, content)
           }
-        } catch {
-          // Fallback: split archives (.001), corrupted ZIPs, etc.
-          await extractWith7z(localFile, outputDir, password ?? undefined)
         }
 
         rmSync(localFile)

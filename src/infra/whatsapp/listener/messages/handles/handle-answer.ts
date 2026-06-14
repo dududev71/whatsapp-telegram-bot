@@ -1,5 +1,6 @@
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import type { AnswerCommands } from '../repository/answers.ts'
 
 export class HandleAnswer {
@@ -16,9 +17,9 @@ export class HandleAnswer {
 
     const commandsMapper: AnswerCommands[] = await Promise.all(
       commandFiles.map(async (file) => {
-        const {
-          [Object.keys(await import(`${pathCommands}/${file}`))[0]]: CommandClass,
-        } = await import(`${pathCommands}/${file}`);
+        const fileUrl = pathToFileURL(join(pathCommands, file)).href
+        const mod = await import(fileUrl)
+        const CommandClass = mod[Object.keys(mod)[0]]
         if (CommandClass?.name) return new CommandClass();
       }),
     );

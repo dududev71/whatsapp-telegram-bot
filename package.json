@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "tsx --watch ./src/infra/server",
+    "dev": "tsx watch ./src/infra/server.ts",
     "test:unit": " vitest --project unit",
     "test:e2e": " vitest --project e2e",
     "fix": "biome lint --write --unsafe"
@@ -14,7 +14,9 @@
     "@types/qrcode-terminal": "^0.12.2",
     "@types/unzipper": "^0.10.11",
     "prisma": "^7.6.0",
-    "tsx": "^4.21.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },

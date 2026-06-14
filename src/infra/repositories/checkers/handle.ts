@@ -1,5 +1,6 @@
 import { readdirSync } from 'fs'
 import { join } from 'path'
+import { pathToFileURL } from 'node:url'
 import type { Either } from '../../../core/either'
 import type { CheckerAdapter } from '../../../domain/checker/repositories/checker-adapter'
 import type {
@@ -38,10 +39,9 @@ export class HandleSources implements HandleSourcesPort {
 
     const commandsMapper: CheckerAdapter[] = await Promise.all(
       commandFiles.map(async (file) => {
-        const {
-          [Object.keys(await import(`${pathCommands}/${file}`))[0]]:
-            CommandClass,
-        } = await import(`${pathCommands}/${file}`)
+        const fileUrl = pathToFileURL(join(pathCommands, file)).href
+        const mod = await import(fileUrl)
+        const CommandClass = mod[Object.keys(mod)[0]]
         if (CommandClass?.name) return new CommandClass()
       }),
     )

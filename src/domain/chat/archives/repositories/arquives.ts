@@ -1,4 +1,4 @@
-import type { Either } from '../../../core/either'
+import type { Either } from '../../../../core/either'
 import type { ReportForCompact } from '../../shared/arquives/interfaces/compact'
 import type { Archive } from '../enterprise/entity/arquive'
 

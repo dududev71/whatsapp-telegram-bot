@@ -1,11 +1,13 @@
-import { getTdjson } from 'prebuilt-tdlib'
-import { configure, createClient, type Client } from 'tdl'
-
 import { writeFileSync } from 'fs'
+import { createRequire } from 'module'
+import { Client } from 'pg'
+// import { configure, createClient } from 'tdl'
 import type {
-  readDataUriProps,
-  TelegramRepositoryDownload,
+    readDataUriProps,
+    TelegramRepositoryDownload,
 } from '../src/domain/donwload/repositories/telegram-repository'
+const require = createRequire(import.meta.url)
+const { tdl, getTdjson,configure, createClient } = require('./tdl-loader.cjs')
 configure({ tdjson: getTdjson() })
 export class TelegramDownloadRepository implements TelegramRepositoryDownload {
   #client: Client

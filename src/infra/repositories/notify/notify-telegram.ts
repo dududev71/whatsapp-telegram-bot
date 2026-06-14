@@ -1,4 +1,4 @@
-import { writeFileSync, unlinkSync } from 'node:fs'
+import { createReadStream, writeFileSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Telegraf } from 'telegraf'
 import type { NotifyProps } from '../../../domain/notify/enterprise/notify'
@@ -17,11 +17,11 @@ export class NotifyTelegramAdapter implements NotifyRepositoryPort {
     try {
       const tempFile = join(process.cwd(), 'downloads', `temp_report_${Date.now()}.zip`)
       writeFileSync(tempFile, data.fileContent)
-      
-      await this.#bot.telegram.sendDocument(data.jidRecipient, tempFile, {
+
+      await this.#bot.telegram.sendDocument(data.jidRecipient, { source: createReadStream(tempFile), filename: `report_${Date.now()}.zip` }, {
         caption: data.content,
       })
-      
+
       try { unlinkSync(tempFile) } catch {}
     } catch (err) {
       console.error('Error sending file:', err)

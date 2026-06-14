@@ -76,10 +76,7 @@ export class DetailTogglesHandler implements AnswerCommands {
         return await replys.replyText('No checkers selected.')
       }
 
-      const alreadySaved = await dependencies.CheckerProfileRepository.findByJid(jid)
-      if (!alreadySaved) {
-        await dependencies.CheckerProfileRepository.upsert(jid, selected)
-      }
+      await dependencies.CheckerProfileRepository.upsert(jid, selected)
       checkerState.delete(jid)
 
       // Go to mode screen instead of running directly

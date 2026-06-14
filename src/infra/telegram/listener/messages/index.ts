@@ -1,21 +1,15 @@
 import type { Context } from 'telegraf'
-import type { TelegramConnection } from '../../Connection'
-import type { ArchivesRepository } from '../../../../domain/chat/archives/repositories/arquives'
-import type { HandleSourcesPort } from '../../../../domain/checker/repositories/handle-sources'
-import type { ReadArchives } from '../../../../domain/checker/repositories/read-archive'
 import { TelegramDownloadService } from '../../../../domain/donwload/aplication/services/telegram-download'
 import { OnDownloadRequested } from '../../../../domain/donwload/aplication/subscribers/download'
-import type { DownloadRequestedEvent } from '../../../../events/download-request-event'
 import { SendFileToJidService } from '../../../../domain/notify/aplication/services/send-file-to-jid'
 import { SendNotifyToJidService } from '../../../../domain/notify/aplication/services/send-notify-to-jid'
 import { OnSendFileRequested } from '../../../../domain/notify/aplication/subiscriber/send-file-report'
 import { OnSendNotifyRequested } from '../../../../domain/notify/aplication/subiscriber/send-notify-subscriber'
-import type { NotifyRepositoryPort } from '../../../../domain/notify/repositories/notify'
 import { CheckerSessionStore } from '../../../../domain/shared/checker/checker-session-store'
-import type { CheckerProfileRepository } from '../../../../domain/shared/repositories/checker-profile'
+import type { DownloadRequestedEvent } from '../../../../events/download-request-event'
 import { PrismaRepositoryCheckerProfile } from '../../../repositories/prisma/prisma-repository-checker-profile.js'
+import type { TelegramConnection } from '../../Connection'
 
-import type { NetflixCookies } from '../../../../domain/chat/repositories/netflix'
 import { DownloadProgresStore } from '../../../../domain/shared/download/donowload-progress-store'
 import { EventDispatcher } from '../../../../events'
 import { ArchivesRepositoryAdapter } from '../../../repositories/arquives/arquives'
@@ -29,29 +23,29 @@ import { TelegramDownloadRepository } from '../../../repositories/telegram/donwl
 import { HandleCommands } from './handles/handle-main-commands'
 import type { ExecuteAnswerProps } from './repository/answers'
 import type { ButtonsInterface, ExecuteProps } from './repository/command'
+import type { depencies } from './repository/deps'
 import { AnswerWatings } from './utils/answer-wating'
 
 interface Settings {
   prefix: string
   readHistory: boolean
 }
-
-export interface depencies {
-  ensureTdLibInitialized: () => Promise<{
-    downloadService: TelegramDownloadService
-    telegramChatRepository: TelegramChatRepository
-  }>
-  DownloadProgresStore: DownloadProgresStore
-  CheckerSessionStore: CheckerSessionStore
-  CheckerProfileRepository: CheckerProfileRepository
-  PrismaRepositoryDownloads: PrismaRepositoryDownloads
-  dispatcher: EventDispatcher
-  archiveRepository: ArchivesRepository
-  ReadArchives: ReadArchives
-  handleChecker: HandleSourcesPort
-  NotifyRepository: NotifyRepositoryPort
-  NetflixRepository: NetflixCookies
-}
+// export interface depencies {
+//   ensureTdLibInitialized: () => Promise<{
+//     downloadService: TelegramDownloadService
+//     telegramChatRepository: TelegramChatRepository
+//   }>
+//   DownloadProgresStore: DownloadProgresStore
+//   CheckerSessionStore: CheckerSessionStore
+//   CheckerProfileRepository: CheckerProfileRepository
+//   PrismaRepositoryDownloads: PrismaRepositoryDownloads
+//   dispatcher: EventDispatcher
+//   archiveRepository: ArchivesRepository
+//   ReadArchives: ReadArchives
+//   handleChecker: HandleSourcesPort
+//   NotifyRepository: NotifyRepositoryPort
+//   NetflixRepository: NetflixCookies
+// }
 
 export class TelegramListener {
   private settings: Settings
@@ -70,7 +64,7 @@ export class TelegramListener {
 
   static async start(socket: TelegramConnection, settings?: Settings) {
     const dispatcher = new EventDispatcher()
-    
+
     const sharedProgress = new DownloadProgresStore()
     const checkerSessionStore = new CheckerSessionStore()
     const checkerProfileRepository = new PrismaRepositoryCheckerProfile()
@@ -80,27 +74,27 @@ export class TelegramListener {
     const handleSources = await HandleSources.start()
     const ReadArchives = new ReadArchivesAdapter()
     const notifyRepository = new NotifyTelegramAdapter(socket.bot)
-    
+
     // Lazy-loaded TDLib repositories - initialized on first command use
     let telegramChatRepository: TelegramChatRepository | null = null
     let telegramDownloadRepository: TelegramDownloadRepository | null = null
     let downloadService: TelegramDownloadService | null = null
     let tdLibInitPromise: Promise<void> | null = null
-    
+
     const ensureTdLibInitialized = async () => {
       if (downloadService) return { downloadService, telegramChatRepository: telegramChatRepository! }
-      
+
       // If initialization is already in progress, wait for it
       if (tdLibInitPromise) {
         await tdLibInitPromise
         return { downloadService: downloadService!, telegramChatRepository: telegramChatRepository! }
       }
-      
+
       // Start initialization
       tdLibInitPromise = (async () => {
         telegramChatRepository = await TelegramChatRepository.handle()
         telegramDownloadRepository = await TelegramDownloadRepository.handle()
-        
+
         downloadService = new TelegramDownloadService(
           telegramDownloadRepository,
           sharedProgress,
@@ -109,7 +103,7 @@ export class TelegramListener {
           archiveRepository,
         )
       })()
-      
+
       await tdLibInitPromise
       return { downloadService, telegramChatRepository: telegramChatRepository! }
     }
@@ -124,15 +118,15 @@ export class TelegramListener {
       dispatcher,
       sendFileToJid,
     )
-    
+
     // Lazy download subscriber - initializes TDLib on first download request
     class LazyDownloadSubscriber {
       private subscriber: OnDownloadRequested | null = null
-      
+
       register() {
         dispatcher.register('download.requested', this.handle.bind(this))
       }
-      
+
       private async handle(event: DownloadRequestedEvent) {
         if (!this.subscriber) {
           const { downloadService } = await ensureTdLibInitialized()
@@ -142,7 +136,7 @@ export class TelegramListener {
       }
     }
     const onDownloadRequested = new LazyDownloadSubscriber()
-    
+
     onSendFileRequested.register()
     onSendNotifyRequestSubscriber.register()
     onDownloadRequested.register()
@@ -308,7 +302,9 @@ export class TelegramListener {
 
       if (existWatingAnswerToJid) {
         console.log(`[ANSWER] -> callback_query -> by: ${utils.userName}`)
-        await answerWating.execute(answerPayload)
+        await ctx.answerCbQuery()
+        void answerWating.execute(answerPayload)
+        return
       }
 
       await ctx.answerCbQuery()

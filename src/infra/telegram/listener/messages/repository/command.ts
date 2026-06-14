@@ -1,6 +1,6 @@
-import type { Context } from 'telegraf'
-import type { depencies } from '..'
-import type { AnswerWatings } from '../utils/answer-wating'
+import type { Context } from 'telegraf';
+import type { AnswerWatings } from '../utils/answer-wating';
+import type { depencies } from './deps'; // ✅ era: from '..'
 
 export interface ButtonsInterface {
   text: string

@@ -35,10 +35,7 @@ export class SelectCheckersHandler implements AnswerCommands {
         const checkers = dependencies.handleChecker.listCheckers()
         const onlineCheckers = checkers.filter((c) => c.online)
 
-        const alreadySaved = await dependencies.CheckerProfileRepository.findByJid(jid)
-        if (!alreadySaved) {
-          await dependencies.CheckerProfileRepository.upsert(jid, onlineCheckers.map((c) => c.name))
-        }
+        await dependencies.CheckerProfileRepository.upsert(jid, onlineCheckers.map((c) => c.name))
 
         this.goToModeScreen(replys, answerWating, jid, fileName, undefined)
         break

@@ -16,7 +16,8 @@ export class CommandAdpter implements Command {
     )
     const res = await getManyDownloadsDescompacts.handle()
     if (res.isLeft()) return await replys.replyText('Command fail. try again')
-    if (res.value.length === 0)
+    const validDownloads = res.value.filter((item) => item.fileName)
+    if (validDownloads.length === 0)
       return await replys.replyText('No downloads available.')
 
     await answerWating.SetAnswerWating({
@@ -32,7 +33,7 @@ export class CommandAdpter implements Command {
     await replys.replyButton({
       footer: 'Available Downloads to checker',
       text: 'Select a file:',
-      buttons: res.value.map((item) => ({
+      buttons: validDownloads.map((item) => ({
         buttonId: item.fileName,
         buttonText: {
           displayText: `${item.fileName} (${item.cratedAt.toDateString()})`,

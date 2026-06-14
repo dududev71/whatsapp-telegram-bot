@@ -1,7 +1,19 @@
-import { getTdjson } from 'prebuilt-tdlib'
-import { configure, createClient, type Client } from 'tdl'
+import { createRequire } from 'module'
+import { Client } from 'pg'
 
-configure({ tdjson: getTdjson() })
+const require = createRequire(import.meta.url)
+const { load } = require('./tdl-loader.cjs')
+
+let _configure: any
+let _createClient: any
+
+async function initTdl() {
+  if (_configure) return
+  const { configure, createClient, getTdjson } = await load()
+  _configure = configure
+  _createClient = createClient
+  configure({ tdjson: getTdjson() })
+}
 
 export abstract class TelegramBaseRepository {
   static #sharedClient: Client | null = null
@@ -9,11 +21,13 @@ export abstract class TelegramBaseRepository {
   protected constructor(protected readonly client: Client) {}
 
   static async getClient(): Promise<Client> {
+    await initTdl()
+
     if (TelegramBaseRepository.#sharedClient) {
       return TelegramBaseRepository.#sharedClient
     }
 
-    const client = createClient({
+    const client = _createClient({
       apiId: 37335293,
       apiHash: '83be25e5aeb3167948f9b7fba5cf89b9',
       databaseDirectory: '.tdlib/db',

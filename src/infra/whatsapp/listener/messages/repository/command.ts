@@ -1,5 +1,5 @@
 import type { WAMessage } from '@itsukichan/baileys'
-import type { depencies } from '..'
+import type { depencies } from './deps'
 import type { WaSocketReturnType } from '../../../../../@types/whatsapp'
 import type { AnswerWatings } from '../utils/answer-wating'
 
